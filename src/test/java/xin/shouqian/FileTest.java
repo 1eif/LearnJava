@@ -3,6 +3,8 @@ package xin.shouqian;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
@@ -119,6 +121,160 @@ public class FileTest {
             displaySize = size + " bytes";
         }
         return displaySize;
+    }
+
+    /**
+     * 删除
+     */
+    @Test
+    public void testPermission() {
+        File file = new File("D:/aaa.exe");
+        System.out.println("canRead ? " + file.canRead());
+        System.out.println("canWrite ? " + file.canWrite());
+        System.out.println("canExecute ? " + file.canExecute());
+
+    }
+
+    /**
+     * 删除
+     */
+    @Test
+    public void testDeleteFile() {
+        File file = new File("D:/aaa.exe");
+        // 删除文件或空文件夹
+        boolean result = file.delete();
+        System.out.println("isDelete ? " + result);
+    }
+
+    /**
+     * 重命名和移动
+     * 同路径不同名：重命名，不同路径同名：移动
+     */
+    @Test
+    public void testRenameAndMove() {
+        File file = new File("D:/aaa.exe");
+        boolean isSuc = file.renameTo(new File("D:/bbb.exe"));
+        System.out.println("isSuc ? " + isSuc);
+
+        System.out.println("--------------------------------");
+
+        File file2 = new File("D:/bbb.exe");
+        boolean isSuc2 = file2.renameTo(new File("D:/temp/bbb.exe"));
+        System.out.println("isSuc ? " + isSuc2);
+
+    }
+
+    /**
+     * 创建文件夹
+     * mkdir 创建一层
+     * mkdirs 创建多层
+     */
+    @Test
+    public void testCreateFolder() {
+        File file = new File("D:/temp");
+        System.out.println("isFile ? " + file.isFile());
+        System.out.println("isDirectory ? " + file.isDirectory());
+
+        // 创建文件夹
+        boolean isCreate = file.mkdir();
+        System.out.println("isCreate ? " + isCreate);
+
+        File folder = new File("D:/temp/a/b/c/d");
+        boolean isCreate2 = folder.mkdirs();
+        System.out.println("isCreate ? " + isCreate2);
+    }
+
+    /**
+     * 文件夹
+     */
+    @Test
+    public void testViewFolder() {
+        File folder = new File("D:/temp");
+        String[] subNames = folder.list();
+        for (String name : subNames) {
+            System.out.println(name);
+        }
+        System.out.println("------------------------");
+
+        File[] subFiles = folder.listFiles();
+        for (File subFile : subFiles) {
+            if (subFile.isFile()) {
+                //System.out.println(subFile.getName());
+                System.out.println(subFile.getAbsolutePath());
+            } else {
+                //System.out.println("[" + subFile.getName() + "]");
+                System.out.println("[" + subFile.getAbsolutePath() + "]");
+            }
+        }
+
+        // 父路径
+        File file = new File("D:/aaa.exe");
+        System.out.println(file.getParent());
+        System.out.println(file.getParentFile().getName());
+    }
+
+    /**
+     * 文件过滤
+     */
+    @Test
+    public void testFilterFolder() {
+        File folder = new File("D:/temp");
+
+        // FilenameFilter()
+        // 查找所有txt
+//        FilenameFilter filenameFilter = new FilenameFilter() {
+//            @Override
+//            public boolean accept(File dir, String name) {
+//                return name.endsWith(".txt");
+//            }
+//        };
+        FilenameFilter filenameFilter = (dir, name) -> name.endsWith(".txt");
+
+        String[] subNames = folder.list(filenameFilter);
+        for (String subName : subNames) {
+            System.out.println(subName);
+        }
+
+        System.out.println("--------------------------");
+
+        File[] files = folder.listFiles(filenameFilter);
+        for (File file : files) {
+            System.out.println(file.getName());
+        }
+
+        System.out.println("==========================");
+        // FileFilter()
+//        FileFilter fileFilter = new FileFilter() {
+//            @Override
+//            public boolean accept(File subFile) {
+//                return subFile.getName().endsWith(".jpg");
+//            }
+//        };
+        FileFilter fileFilter = subFile -> subFile.getName().endsWith(".jpg");
+        File[] subFiles = folder.listFiles(fileFilter);
+        for (File file : subFiles) {
+            System.out.println(file.getName());
+        }
+    }
+
+
+    @Test
+    public void testShowFolder() {
+        File folder = new File("D:/temp");
+
+        // 递归，要有退出机制
+        showFolder(folder);
+    }
+    // 递归
+    public void showFolder(File file) {
+        if (file.isFile()) {
+            System.out.println(file.getAbsolutePath());
+        } else {
+            File[] subFiles = file.listFiles();
+            for (File subFile : subFiles) {
+                showFolder(subFile);
+            }
+        }
     }
 
     @Test
