@@ -7,11 +7,14 @@ import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class FileTest {
 
@@ -278,6 +281,150 @@ public class FileTest {
     }
 
     @Test
+    public void testPath() {
+        //创建Path对象
+        Path path = Paths.get("D:/temp/files");
+
+        // File->Path
+        File file = new File("D:/temp/files");
+        path = file.toPath();
+
+        // Path->File
+        File file2 = path.toFile();
+    }
+
+    @Test
+    public void testCreateFolderWithFiles() {
+        Path path = Paths.get("D:/temp/files");
+        try {
+            Files.createDirectories(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testMoveFile() {
+
+        Path sourcePath = Paths.get("D:/temp/files/aaa.txt");
+        Path targetPath = Paths.get("D:/temp/files/doc/aaa.txt");
+
+        try {
+            Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);// 存在覆盖
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testMoveFile2() {
+
+        Path sourcePath = Paths.get("D:/temp/files/doc/aaa.txt");
+        Path targetPath = Paths.get("D:/temp/files/doc/bbb.txt");
+
+        try {
+            Files.move(sourcePath, targetPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testDeleteFiles() {
+
+        Path path = Paths.get("D:/temp/files/doc/bbb.txt");
+
+        try {
+            Files.delete(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testWalkFileTree() {
+
+        Path path = Paths.get("D:/temp/files");
+
+        try {
+            Files.walkFileTree(path, new FileVisitor<Path>() {
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    System.out.println(file + "->" +attrs.size());
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    System.out.println("文件夹：" + dir);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 统计文件夹
+     */
+    @Test
+    public void testFolderSizeWithFiles() {
+
+        Path path = Paths.get("D:/temp/files");
+
+        try {
+            AtomicLong atomicLong = new AtomicLong(0);
+            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    atomicLong.addAndGet(attrs.size());
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+            System.out.println(atomicLong.get() + "字节");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 删除非空文件夹
+     */
+    @Test
+    public void testDeleteFolderWithFiles() {
+        Path path = Paths.get("D:/temp/files/img");
+
+        try {
+            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    Files.delete(dir);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
     public void testNumber() {
         long max = Long.MAX_VALUE;
         System.out.println(max);
@@ -286,4 +433,5 @@ public class FileTest {
         bi = bi.add(BigInteger.ONE);
         System.out.println(bi);
     }
+
 }
