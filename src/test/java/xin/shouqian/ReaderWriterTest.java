@@ -3,6 +3,14 @@ package xin.shouqian;
 import org.junit.Test;
 
 import java.io.*;
+import java.lang.reflect.Parameter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.List;
+import java.util.Scanner;
 
 public class ReaderWriterTest {
 
@@ -80,4 +88,86 @@ public class ReaderWriterTest {
             e.printStackTrace();
         }
     }
+
+    @Test
+    public void testPrintStream() {
+
+        try {
+            PrintStream printStream = new PrintStream(FILEPATH);
+
+            printStream.println("Hello");
+
+            printStream.flush();
+            printStream.close();
+
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testPrintWrite() {
+        try {
+            PrintWriter printWriter = new PrintWriter(FILEPATH);
+
+            printWriter.println("aaa");
+            printWriter.flush();
+            printWriter.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void testScanner() {
+
+        try {
+            InputStream inputStream = new FileInputStream(FILEPATH);
+            Scanner scanner = new Scanner(inputStream);
+
+            // 更改默认分隔符
+            //scanner.useDelimiter("\r\n");
+            String lineSeparator = System.getProperty("line.separator");
+            scanner.useDelimiter(lineSeparator);
+
+            while (scanner.hasNext()) {
+                String str = scanner.next();
+                System.out.println(str);
+
+            }
+            scanner.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testFilesReader() {
+        Path path = Paths.get(FILEPATH);
+
+        try {
+            List<String> stringList = Files.readAllLines(path);
+            for (String str : stringList) {
+                System.out.println(str);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testFilesWriter() {
+        Path path = Paths.get(FILEPATH);
+
+        String str = "hello";
+        try {
+            Files.write(path, str.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
+
+
